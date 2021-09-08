@@ -1,0 +1,276 @@
+---
+permalink: /debian-installation-over-ssh/
+---
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#db5945">
+    <title>Ciborski's guide to remote Debian installation over SSH</title>
+    <style type="text/css">
+        html {
+            font-size: medium;
+        }
+
+        body {
+            font-family: georgia, times, serif;
+            margin: 2rem auto;
+            max-width: 40em;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 0 2em;
+
+            color: #444;
+            background-color: #a8023008;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        }
+
+        pre,
+        code,
+        xmp {
+            /* font-family: courier; */
+            font-size: 1rem;
+            /* line-height: 1.4; */
+            /* white-space: pre-wrap; */
+        }
+
+        a {
+            color: #3A68B4;
+            font-size: 1em;
+            text-decoration: underline;
+        }
+
+
+        a:hover {
+            background: #f0f0ff;
+            font-size: 1em;
+            text-decoration: underline;
+        }
+
+        a:active {
+            background-color: #427fed;
+            color: #fffff6;
+            color: white;
+            font-size: 1em;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Ciborski's guide to remote Debian installation over SSH</h1>
+        <aside>I spent 2 days figuring out how install a fucking Debian without a display</aside>
+    </header>
+
+    <h2>TL;DR; give me the ISO</h2>
+    <p>
+        <a href="https://files.ciborski.com/$/lZzJi">debian-9.6.0-amd64-netinst-over-ssh.iso (291M)</a> - remastered USB compatible version
+        of Debian 9 ISO. Ready to flash to your USB. UEFI and BIOS compatible
+    </p>
+    <p>
+        <ol>
+            <li>
+                Flash the ISO to USB
+            </li>
+            <li>
+                Plug USB to target computer. Reboot..
+            </li>
+            <li>
+                Wait 2min. Check for the target computer IP address
+            </li>
+            <li>
+                SSH to the IP with user <code>installer</code>, password <code>root</code>
+            </li>
+
+        </ol>
+    </p>
+
+    <h2>Result</h2>
+    <p>
+        <img alt="terminal ssh view" src="/assets/terminal.png">
+    </p>
+    <p>
+        <img alt="ssh debian installation" src="/assets/installer.png">
+    </p>
+
+    <h2>Instructions unclear, dick stuck in microwave</h2>
+    <p>
+        Seriously, Debian guides on the web are misleading and outdated
+    </p>
+    <ul>
+        <li>
+            <p>
+                <a href="https://askubuntu.com/questions/882911/how-do-i-use-maas-to-create-a-debian-image">MAAS</a> -
+                is
+                some Ubuntu/CentOS bullshit not capable of remotely installing Debian out of the box.
+            </p>
+            <p>It's actually a PXE server but they don't say it straight. You have to go through incomprehensible
+                marketing bullshit and taste it yourself
+            </p>
+            <p>It only allows you to boot a distro over PXE, and <strong>if</strong> you have a proper ISO, then MAAS
+                will
+                automatically install it. Turns out that there are not too many available..
+            </p>
+            <p>
+                <a href="https://askubuntu.com/questions/882911/how-do-i-use-maas-to-create-a-debian-image">Here's</a>
+                some guide that I did not work for me. It's useless anyway so whatever...
+            </p>
+        <li>
+            <p>
+                <a href="https://www.debian.org/CD/faq/#why-jigdo">This guide for CD remastering</a>
+            </p>
+        </li>
+        <li>
+            <p>
+                <a href="https://launchpad.net/debian-installer">Trying to understand how debian-installer works</a>
+            </p>
+        </li>
+        <li>
+            <p>
+                <a href="https://lists.debian.org/debian-boot/2012/12/msg00043.html">Some mailing list on keyboard
+                    preseeding topic</a>
+            </p>
+        </li>
+        <li>
+            <p>
+                <a href="https://www.debian.org/releases/wheezy/example-preseed.txt">Fucking confusing example-preseed
+                    that doesn't preseed keyboard</a>
+            </p>
+        </li>
+        <li><a href="https://superuser.com/questions/724294/set-keyboard-layout-in-debian-wheezy-with-preseed">keyboard
+                preseeding</a> - because nowadays you should use "auto" boot param</li>
+        <li>
+            <p>
+                <a href="https://wiki.debian.org/UEFI">Great fucking article on UEFI that doesn't explain how it works
+                    in debian ISO. Fucking great.. thanks guys</a>
+            </p>
+            <p>
+                it turns out that there are 2 bootloaders on debian ISO
+                <ul>
+                    <li>for UEFI</li>
+                    <li>for BIOS</li>
+                </ul>
+                and they are <i>separate</i> from each other...
+            </p>
+            <p>
+                Info on how badly is it fucked up is <a href="https://askubuntu.com/questions/651902/what-is-the-difference-between-grub-and-syslinux">here</a>
+            </p>
+            <blockquote>
+                TL;DR GRUB and ISOLINUX are both used in Ubuntu live CD for exclusive reasons; Both were included in
+                live CD for better boot experience and hardware support.
+            </blockquote>
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/RepackBootableISO">another bloated guide</a> - helped with <code>xorriso</code>
+            but nothing else. and is so fucking <strong>complex</strong>
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/DebianInstaller/Modify/CD">Debian Installer Modify CD</a> - just useless
+            and misleading
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/DebianInstaller/NetworkConsole">Debian Installer Network Console</a> -
+            another misleading trap
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/DebianInstaller/Preseed">Debian Installer Preseed</a> - more bullshit
+        </li>
+        <li>
+            <a href="https://www.debian.org/CD/netinst/">Network install from a minimal CD</a> Network Install promise?
+            Network? Change your fucking wording so it does not resemble remote install
+        </li>
+        <li>
+            <a href="https://www.debian.org/releases/jessie/i386/ch06s01.html.en">6.1. How the Installer Works</a> -
+            that's a joke. No word about UEFI or BIOS and booting. How the hell am I going to guess this?
+        </li>
+        <li>
+            <a href="https://unix.stackexchange.com/questions/196874/prevent-language-selection-at-ubuntu-installation">Prevent
+                Language selection at ubuntu installation</a> - doesn't work bullshit
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/Simple-CDD/Howto">Simple-CDD Howto</a> - JUST DOES NOT BOOT USB. FUCK YOU
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/DebianCustomCD#Building_a_Custom_Debian_CD_Set">DebianCustomCD</a> - easy
+            as 1,2,3... 4 year old could do it... sure.. yeah... carry on
+        </li>
+        <li>
+            <a href="https://wiki.debian.org/DebianInstaller/Remote">Installing Debian remotely using the network
+                console</a> - another promising title that doesnt work
+        </li>
+        <li>
+            <a href="https://princessleia.com/journal/2008/11/debian-installation-over-ssh-lenny-rc1/">Debian
+                Installation Over SSH (Lenny RC1)</a> - what? remote installation but you need a monitor? I thought the
+            whole point of it was being remote and over SSH
+        </li>
+
+        <li>
+            <a href="https://github.com/mfherbst/debian-preansible/blob/master/add_preseeds_to_iso.sh">https://github.com/mfherbst/debian-preansible/blob/master/add_preseeds_to_iso.sh</a>
+        </li>
+        <li>
+            <a href="https://serverfault.com/questions/109601/remote-reinstall-of-linux-over-ssh">https://serverfault.com/questions/109601/remote-reinstall-of-linux-over-ssh</a>
+        </li>
+        <li>
+            <a href="https://blog.sleeplessbeastie.eu/2015/10/12/how-to-install-debian-remotely/">https://blog.sleeplessbeastie.eu/2015/10/12/how-to-install-debian-remotely/</a>
+        </li>
+        <li>
+            <a href="https://superuser.com/questions/688220/how-to-install-ubuntu-on-debian-headless-server">https://superuser.com/questions/688220/how-to-install-ubuntu-on-debian-headless-server</a>
+        </li>
+        <li>
+            <a href="https://github.com/duplicati/duplicati/wiki/Headless-installation-on-Debian-or-Ubuntu">https://github.com/duplicati/duplicati/wiki/Headless-installation-on-Debian-or-Ubuntu</a>
+        </li>
+        <li>
+            <a href="https://unix.stackexchange.com/questions/416564/headless-boot-and-install-on-same-usb-device">https://unix.stackexchange.com/questions/416564/headless-boot-and-install-on-same-usb-device</a>
+        </li>
+        <li>
+            <a href="https://www.reddit.com/r/linux/comments/1mf18o/is_a_debianubuntu_headless_install_really_this/">https://www.reddit.com/r/linux/comments/1mf18o/is_a_debianubuntu_headless_install_really_this/</a>
+        </li>
+        <li>
+            <a href="https://sowhatisthesolution.wordpress.com/2016/03/13/headless-debian-install-via-ssh/">https://sowhatisthesolution.wordpress.com/2016/03/13/headless-debian-install-via-ssh/</a>
+        </li>
+	<li>
+		<a href="https://shaunfreeman.name/blog/gigabyte-brix-bxbt-1900-not-booting-without-monitor-on-ubuntu-minimal-16-04">https://shaunfreeman.name/blog/gigabyte-brix-bxbt-1900-not-booting-without-monitor-on-ubuntu-minimal-16-04</a>
+	</li>
+    </ul>
+
+    <h2>What did work</h2>
+    <ul>
+        <li>
+            using brain
+        </li>
+        <li>
+            <p>
+                reading debian installer manual carefully - <a href="https://www.debian.org/releases/stretch/amd64/">Debian
+                    GNU/Linux Installation Guide</a>
+            </p>
+            <p>
+                <strong>WHAAAAT?</strong> Are you insane???! This manual is not easily consumable by humans. But yeah,
+                I
+                went through it. Especially <a href="https://www.debian.org/releases/stable/i386/apbs02.html.en#preseed-auto">this</a>
+                part was important. Buy me a beer
+            </p>
+        </li>
+        <li>
+            guessing how GRUB2 and SYSLINUX bootloaders work and patching them in <code>/iso/syslinux/</code> and <code>/iso/boot/</code>
+        </li>
+    </ul>
+
+
+
+    <h2>Proper guide on how to do this</h2>
+    <p>Brb, need to get a coffe first</p>
+
+    <p>Inspired by the geniuses behind <a href="http://bettermotherfuckingwebsite.com/">bettermotherfuckingwebsite.com</a>
+        and <a href="https://codepen.io/dredmorbius/pen/KpMqqB?page=87&q=zoom">Edward Morbius's motherfucking website</a>.</p>
+</body>
+
+</html>
